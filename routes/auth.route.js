@@ -1,12 +1,12 @@
 import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { validateSignup } from "../middleware/validate.middleware.js";
-
+import {
+  validateSignup,
+  validateLogin,
+} from "../middleware/validate.middleware.js";
+import { signup, login } from "../controller/auth.controller.js";
 const authRouter = express.Router();
 
-authRouter.post("/signup", validateSignup, (req, res) => {});
-
-authRouter.post("/login", (res, req) => {});
+authRouter.post("/signup", validateSignup, signup);
+authRouter.post("/login", validateLogin, login);
 
 export default authRouter;
