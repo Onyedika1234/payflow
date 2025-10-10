@@ -1,44 +1,35 @@
 import prisma from "../utils/prisma.js";
-export const transcation = async (req, res) => {
+import { Prisma } from "@prisma/client";
+export const transaction = async (req, res) => {
   const { senderId } = req.params;
-  const { amount, receiverId } = req.body;
+  const { receiverId } = req.body;
+
+  const numericAmount = req.numericAmount;
 
   try {
-    const sender = await prisma.wallet.findUnique({ where: { id: senderId } });
-    const receiver = await prisma.wallet.findUnique({
-      where: { id: receiverId },
-    });
-
-    if (!receiver || !sender)
-      return res
-        .status(404)
-        .json({ success: false, errMsg: "Sender/Receiver not found" });
-
-    //Update both sender and receiver
-    const updatedSender = await prisma.wallet.update({
-      where: { id: senderId },
-      data: {
-        balance: updatedSender.balance - amount,
-      },
-    });
-    const updatedReceiver = await prisma.wallet.update({
-      where: { id: receiverId },
-      data: {
-        balance: updatedReceiver.balance + amount,
-      },
-    });
-
-    //Create a transaction
-
-    const transcation = await prisma.transactions.create({
-      data: {
-        amount: amount,
-        senderId: senderId,
-        receiverId: receiverId,
-      },
-    });
-
-    res.status(201).json({ success: true, transcation });
+    const [updatedSender, updatedReceiver, transaction] =
+      await prisma.$transaction([
+        prisma.wallet.update({
+          where: { id: senderId },
+          data: {
+            balance: { decrement: numericAmount },
+          },
+        }),
+        prisma.wallet.update({
+          where: { id: receiverId },
+          data: { balance: { increment: numericAmount } },
+        }),
+        prisma.transactions.create({
+          data: {
+            amount: numericAmount,
+            senderId,
+            receiverId,
+          },
+        }),
+      ]);
+    res
+      .status(201)
+      .json({ success: true, transaction, updatedSender, updatedReceiver });
   } catch (error) {
     res.status(500).json({ success: false, errMsg: "Error in transacting" });
   }
