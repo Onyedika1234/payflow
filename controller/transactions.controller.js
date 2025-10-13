@@ -34,3 +34,38 @@ export const transaction = async (req, res) => {
     res.status(500).json({ success: false, errMsg: "Error in transacting" });
   }
 };
+
+// Get all credit transcations of a user
+export const getCreditTransactions = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userTransactions = await prisma.transactions.findMany({
+      where: {
+        receiverId: id,
+      },
+    });
+    res.status(200).json({ success: true, userTransactions });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, errMsg: "Error in getting transactions" });
+  }
+};
+
+// Get all debit transcations of a user
+
+export const getDebitTransactions = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userTransactions = await prisma.transactions.findMany({
+      where: {
+        senderId: id,
+      },
+    });
+    res.status(200).json({ success: true, userTransactions });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, errMsg: "Error in getting transactions" });
+  }
+};
