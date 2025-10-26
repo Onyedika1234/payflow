@@ -1,5 +1,4 @@
 import prisma from "../utils/prisma.js";
-import { Prisma } from "@prisma/client";
 export const transaction = async (req, res) => {
   const { senderId } = req.params;
   const { receiverId } = req.body;

@@ -38,51 +38,13 @@ export const validateAmount = (req, res, next) => {
       .status(400)
       .json({ success: false, errMsg: "All input must be filled" });
 
+  if (amount < 500 || typeof amount != "number")
+    return res.status(400).json({
+      success: false,
+      errMsg: "Invalid amount format. Must be a number greater than 500",
+    });
   next();
 };
-
-// export const validateTransaction = async (req, res, next) => {
-//   const { senderId } = req.params;
-//   const { amount, receiverId } = req.body;
-//   try {
-//     const numericAmount = new Prisma.Decimal(amount);
-
-//     if (!receiverId || !amount)
-//       return res
-//         .status(400)
-//         .json({ success: false, errMsg: "All inputs must be filled" });
-
-//     if (senderId === receiverId)
-//       return res
-//         .status(400)
-//         .json({ success: false, errMsg: "You cant transact with yourself" });
-
-//     const sender = await prisma.wallet.findUnique({ where: { id: senderId } });
-//     const receiver = await prisma.wallet.findUnique({
-//       where: { id: receiverId },
-//     });
-
-//     if (!sender || !receiver)
-//       return res
-//         .status(404)
-//         .json({ success: false, errMsg: "Sender/Receiver not found" });
-
-//     if (sender.balance.lt(numericAmount))
-//       return res
-//         .status(400)
-//         .json({ success: false, errMsg: "Insufficient balcance" });
-
-//     req.sender = sender;
-//     req.numericAmount = numericAmount;
-//     req.receiver = receiver;
-
-//     next();
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .json({ success: false, errMsg: "Error validating credentials" });
-//   }
-// };
 
 export const validateTransaction = async (req, res, next) => {
   const { senderId } = req.params;
@@ -98,6 +60,12 @@ export const validateTransaction = async (req, res, next) => {
       return res
         .status(400)
         .json({ success: false, errMsg: "You can't transact with yourself" });
+
+    if (amount < 500 || typeof amount != "number")
+      return res.status(400).json({
+        success: false,
+        errMsg: "Invalid amount format. Must be a number greater than 500",
+      });
 
     // Safe amount conversion
     let numericAmount;
